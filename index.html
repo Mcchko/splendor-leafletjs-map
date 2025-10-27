@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet Map with Custom Markers</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Function to parse query parameters
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Get and parse the data from query parameter
+        const dataParam = getQueryParam('data');
+        let data;
+        
+        try {
+            data = JSON.parse(decodeURIComponent(dataParam));
+        } catch (e) {
+            console.error("Error parsing data parameter:", e);
+            // Fallback to sample data if parsing fails
+            data = {
+                tiles: "no_label",
+                geoinfo: [
+                    {
+                        "USER": {
+                            "lat": 22.1,
+                            "lon": 114.1,
+                        }
+                    },
+                    {
+                        "R1": {
+                            "lat": 22.2,
+                            "lon": 114.2,
+                        }
+                    },
+                    {
+                        "R2": {
+                            "lat": 22.3,
+                            "lon": 114.3,
+                        }
+                    },
+                    {
+                        "R3": {
+                            "lat": 22.4,
+                            "lon": 114.4,
+                        }
+                    },
+                    {
+                        "R4": {
+                            "lat": 22.5,
+                            "lon": 114.5,
+                        }
+                    },
+                    {
+                        "R5": {
+                            "lat": 22.6,
+                            "lon": 114.6,
+                        }
+                    },
+                    {
+                        "R6": {
+                            "lat": 22.7,
+                            "lon": 114.7,
+                        }
+                    },
+                    {
+                        "HOUSE": {
+                            "lat": 22.8,
+                            "lon": 114.8,
+                        }
+                    },
+                ],
+            };
+        }
+
+        // Initialize the map
+        const map = L.map('map').setView([22.25, 114.25], 11);
+
+        // Add tile layer based on the tiles parameter
+        if (data.tiles === "no_label") {
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+        } else {
+            // Default tiles if no_label isn't specified
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+        }
+
+        // Create custom icons
+		const iconMapper = {
+			USER: L.icon({
+				iconUrl: 'static/img/User.PNG',
+				iconSize: [32, 32],
+				iconAnchor: [16, 16]
+			}),
+			R1: L.icon({
+				iconUrl: 'static/img/R1.PNG',
+				iconSize: [32, 32],
+				iconAnchor: [16, 16]
+			}),
+			R2: L.icon({
+				iconUrl: 'static/img/R2.PNG',
+				iconSize: [32, 32],
+				iconAnchor: [16, 16]
+			}),
+			R3: L.icon({
+				iconUrl: 'static/img/R3.PNG',
+				iconSize: [32, 32],
+				iconAnchor: [16, 16]
+			}),
+			R4: L.icon({
+				iconUrl: 'static/img/R4.PNG',
+				iconSize: [32, 32],
+				iconAnchor: [16, 16]
+			}),
+			R5: L.icon({
+				iconUrl: 'static/img/R5.PNG',
+				iconSize: [32, 32],
+				iconAnchor: [16, 16]
+			}),
+			R6: L.icon({
+				iconUrl: 'static/img/R6.PNG',
+				iconSize: [32, 32],
+				iconAnchor: [16, 16]
+			}),
+			R6: L.icon({
+				iconUrl: 'static/img/House.PNG',
+				iconSize: [32, 32],
+				iconAnchor: [16, 16]
+			})
+		};
+
+        // Plot markers
+        data.geoinfo.forEach(item => {
+            const type = Object.keys(item)[0];
+            const coords = item[type];
+            
+            const icon = iconMapper[type];
+            
+            L.marker([coords.lat, coords.lon], { icon: icon })
+                .addTo(map)
+                .bindPopup(type);
+        });
+
+        // Fit bounds to show all markers
+        const group = new L.featureGroup(
+            data.geoinfo.map(item => {
+                const coords = Object.values(item)[0];
+                return L.marker([coords.lat, coords.lon]);
+            })
+        );
+        
+        map.fitBounds(group.getBounds().pad(0.2));
+    </script>
+</body>
+</html>
