@@ -19,7 +19,6 @@
 </head>
 <body>
     <div id="map"></div>
-
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         // Function to parse query parameters
@@ -27,7 +26,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get(name);
         }
-
+        
         // Get and parse the data from query parameter
         const dataParam = getQueryParam('data');
         let data;
@@ -91,10 +90,10 @@
                 ],
             };
         }
-
+        
         // Initialize the map
         const map = L.map('map').setView([22.25, 114.25], 11);
-
+        
         // Add tile layer based on the tiles parameter
         if (data.tiles === "no_label") {
             L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
@@ -106,51 +105,51 @@
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(map);
         }
-
-        // Create custom icons
-		const iconMapper = {
-			USER: L.icon({
-				iconUrl: 'static/img/User.PNG',
-				iconSize: [32, 32],
-				iconAnchor: [16, 16]
-			}),
-			R1: L.icon({
-				iconUrl: 'static/img/R1.PNG',
-				iconSize: [32, 32],
-				iconAnchor: [16, 16]
-			}),
-			R2: L.icon({
-				iconUrl: 'static/img/R2.PNG',
-				iconSize: [32, 32],
-				iconAnchor: [16, 16]
-			}),
-			R3: L.icon({
-				iconUrl: 'static/img/R3.PNG',
-				iconSize: [32, 32],
-				iconAnchor: [16, 16]
-			}),
-			R4: L.icon({
-				iconUrl: 'static/img/R4.PNG',
-				iconSize: [32, 32],
-				iconAnchor: [16, 16]
-			}),
-			R5: L.icon({
-				iconUrl: 'static/img/R5.PNG',
-				iconSize: [32, 32],
-				iconAnchor: [16, 16]
-			}),
-			R6: L.icon({
-				iconUrl: 'static/img/R6.PNG',
-				iconSize: [32, 32],
-				iconAnchor: [16, 16]
-			}),
-			R6: L.icon({
-				iconUrl: 'static/img/House.PNG',
-				iconSize: [32, 32],
-				iconAnchor: [16, 16]
-			})
-		};
-
+        
+        // Create custom icons - FIXED: Added HOUSE icon and removed duplicate R6
+        const iconMapper = {
+            USER: L.icon({
+                iconUrl: 'static/img/User.PNG',
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            }),
+            R1: L.icon({
+                iconUrl: 'static/img/R1.PNG',
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            }),
+            R2: L.icon({
+                iconUrl: 'static/img/R2.PNG',
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            }),
+            R3: L.icon({
+                iconUrl: 'static/img/R3.PNG',
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            }),
+            R4: L.icon({
+                iconUrl: 'static/img/R4.PNG',
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            }),
+            R5: L.icon({
+                iconUrl: 'static/img/R5.PNG',
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            }),
+            R6: L.icon({
+                iconUrl: 'static/img/R6.PNG',
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            }),
+            HOUSE: L.icon({  // Fixed: Changed from duplicate R6 to HOUSE
+                iconUrl: 'static/img/House.PNG',
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            })
+        };
+        
         // Plot markers
         data.geoinfo.forEach(item => {
             const type = Object.keys(item)[0];
@@ -158,11 +157,19 @@
             
             const icon = iconMapper[type];
             
-            L.marker([coords.lat, coords.lon], { icon: icon })
-                .addTo(map)
-                .bindPopup(type);
+            if (icon) {
+                L.marker([coords.lat, coords.lon], { icon: icon })
+                    .addTo(map)
+                    .bindPopup(type);
+            } else {
+                console.warn(`No icon found for type: ${type}`);
+                // Fallback to default marker
+                L.marker([coords.lat, coords.lon])
+                    .addTo(map)
+                    .bindPopup(type);
+            }
         });
-
+        
         // Fit bounds to show all markers
         const group = new L.featureGroup(
             data.geoinfo.map(item => {
